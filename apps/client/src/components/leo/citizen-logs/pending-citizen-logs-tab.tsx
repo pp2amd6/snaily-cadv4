@@ -25,6 +25,8 @@ import type {
 import { useQuery } from "@tanstack/react-query";
 import { RecordsCaseNumberColumn } from "../records-case-number-column";
 import { RecordsStatsColumn } from "../records-stats-column";
+import { Editor } from "components/editor/editor";
+import { slateDataToString } from "@snailycad/utils/editor";
 
 interface Props {
   pendingCitizenRecords: GetManagePendingCitizenRecords;
@@ -69,7 +71,7 @@ export function PendingCitizenRecordsTab({ pendingCitizenRecords }: Props) {
   const t = useTranslations("Leo");
   const common = useTranslations("Common");
   const { state, execute } = useFetch();
-  const tableState = useTableState();
+  const tableState = useTableState(asyncTable);
 
   function handleEditClick(item: GetManagePendingCitizenRecords["pendingCitizenRecords"][number]) {
     setTempRecord(item.records!);
@@ -134,11 +136,17 @@ export function PendingCitizenRecordsTab({ pendingCitizenRecords }: Props) {
                 <HoverCard>
                   <HoverCardTrigger asChild>
                     <span className="block max-w-[300px] truncate cursor-help">
-                      {record.notes || common("none")}
+                      {slateDataToString(record.descriptionData) || record.notes || common("none")}
                     </span>
                   </HoverCardTrigger>
 
-                  <HoverCardContent>{record.notes}</HoverCardContent>
+                  <HoverCardContent>
+                    {record.descriptionData ? (
+                      <Editor hideBorder isReadonly value={record.descriptionData} />
+                    ) : (
+                      record.notes || common("none")
+                    )}
+                  </HoverCardContent>
                 </HoverCard>
               ),
               stats: <RecordsStatsColumn record={record} />,
